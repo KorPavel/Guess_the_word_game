@@ -20,8 +20,6 @@ def read_words() -> dict:
 
 words_dct = read_words()
 words_list = list(words_dct.keys())
-guessed_words = []  # Пустой список угаданных слов
-loose_game = False  # Переменная проигрыша (для сброса списков)
 words = words_list.copy()
 
 
@@ -40,7 +38,8 @@ def words_updates() -> None:
         with open('ugadayka_words.txt', 'w', encoding='utf-8') as f:
             for k, v in dct.items():
                 f.write(k+'$'+v+'\n')
-        print(f'Слово {a!r} успешно записано в словарь. Теперь в словаре {len(dct)} слов.')
+        print(f'Слово {a!r} успешно записано в словарь. Теперь в словаре {len(dct)} '
+              f'слов{["", "о", "а", "а", "а", "", "", "", "", ""][len(dct)%10]}.')
         ch = input('Хотите добавить ещё слово? [д/н] ')
         if ch.upper() != 'Н':
             continue
@@ -116,7 +115,7 @@ def display_stats(word_completion: list, lives: str, guessed_letters: list,
     polka = '\033[35m░░\033[0m' * (len(word_completion) + 3) + '\033[35m░\033[0m'
     print(f"\n{polka}       \033[32mВаши попытки:\033[0m")
     print(f'\033[35m░░\033[0m  {quiz_word}  \033[35m░░\033[0m     {lives}')
-    print(f'{polka} \033[32m Ваши победы:\033[0m {sp[0]} из {sp[1]} слов.')
+    print(f'{polka} \033[32m Ваши победы:\033[0m {sp[0]} из {sp[1]} слов{["", "а"][sp[1]%10 == 1]}.')
     print(f'\033[1;36m ПОДСКАЗКА: \033[0m{help_word.capitalize()!r}')
     print(f'\033[33m ИСПОЛЬЗОВАННЫЕ БУКВЫ:\033[0m {u_letters}')
 
@@ -129,7 +128,7 @@ def play_game(word: str, words_dict: dict, guessed_words: list, loose_game: bool
     tries = 6
     lives = display_lives(tries)
     print('Давайте играть в угадайку слов!')
-    while True:  # Основной цикл игровой сессии
+    while not loose_game and tries > 0:  # Основной цикл игровой сессии
         display_stats(word_completion, lives, guessed_letters, help_word, [len(guessed_words), len(words_dict)])
 
         if '_' not in word_completion:  # Проверка, угадано ли слово
@@ -170,22 +169,24 @@ def play_game(word: str, words_dict: dict, guessed_words: list, loose_game: bool
             return guessed_words, loose_game
 
 
+guessed_words = []  # Пустой список угаданных слов
+loose_game = False  # Переменная проигрыша (для сброса списков)
+check = "Д"
 # Основной цикл игры
-while True:
+while check != "Н":
     if not words:  # Сброс, если закончились слова в списке
+        words, guessed_words = game_reset()
         print('\U0001F389 \033[32m Поздравляем! Вы угадали все слова!\033[0m \U0001F3C6 \U0001F37E')
+    elif loose_game:  # Сброс, если игрок проиграл
         words, guessed_words = game_reset()
-
-    elif loose_game == True:  # Сброс, если игрок проиграл
-        words, guessed_words = game_reset()
+        print('Ваши попытки закончились, Вы проиграли. :(((')
 
     word = get_word()
     guessed_words, loose_game = play_game(word, words_dct, guessed_words, loose_game)  # Запуск игровой сессии
     check = input('Пополнить словарь новым словом [слово],\n'
-                  'продолжать играть или выйти?[д/н]: ')  # Проверка окончания игры
-    if check.upper() == 'Н':
-        break
-    elif check.upper() == 'СЛОВО':
+                  'продолжать играть или выйти?[д/н]: ').upper()  # Проверка окончания игры
+
+    if check == 'СЛОВО':
         words_updates()
 
 print('Спасибо за игру!')
