@@ -26,12 +26,13 @@ words = words_list.copy()
 def words_updates() -> None:
     """ Функция добавляет новые слова в словарь и записывает его в файл 'ugadayka_words.txt' """
     dct = read_words()
-    while True:
-        a = input('Введите новое слово: ').upper()
+    ch = 'Д'
+    while ch != 'Н':
+        a = input('Введите новое слово или "==", если передумали: ').upper()
         if any([' ' in a, '-' in a, '$' in a]):
             print('Здесь должно быть введено только ОДНО слово и без дефисов!')
             continue
-        elif a == '':
+        elif a == '==':
             break
         b = input('Введите подсказку: ').capitalize()
         dct.setdefault(a, b)
@@ -40,8 +41,8 @@ def words_updates() -> None:
                 f.write(k+'$'+v+'\n')
         print(f'Слово {a!r} успешно записано в словарь. Теперь в словаре {len(dct)} '
               f'слов{["", "о", "а", "а", "а", "", "", "", "", ""][len(dct)%10]}.')
-        ch = input('Хотите добавить ещё слово? [д/н] ')
-        if ch.upper() != 'Н':
+        ch = input('Хотите добавить ещё слово? [д/н] ').upper()
+        if ch != 'Н':
             continue
         break
 
@@ -121,13 +122,18 @@ def display_stats(word_completion: list, lives: str, guessed_letters: list,
 
 
 def play_game(word: str, words_dict: dict, guessed_words: list, loose_game: bool) -> (list, bool):
-    """ Функция, осуществляющая игровую сессию """
+    """ Правила игры:
+     Случайным образом выбирается слово и даётся к нему небольшая подсказка.
+     - Вам нужно отгадать это слово по буквам или целиком.
+     - В Вашем распоряжении шесть попыток.
+     - При неправильной букве или слове сгорает одна попытка.
+            Желаем удачи!"""
     word_completion = list('_' * len(word))  # Создание списка для загаданного слова с '_' вместо неотгаданных букв
     help_word = words_dict[word]  # Получение подсказки
     guessed_letters = []
     tries = 6
     lives = display_lives(tries)
-    print('Давайте играть в угадайку слов!')
+    print('\n'*5, '\t\033[1;30;43m   Игра "УГАДАЙКА СЛОВО"   \033[0m')
     while not loose_game and tries > 0:  # Основной цикл игровой сессии
         display_stats(word_completion, lives, guessed_letters, help_word, [len(guessed_words), len(words_dict)])
 
@@ -169,6 +175,9 @@ def play_game(word: str, words_dict: dict, guessed_words: list, loose_game: bool
             return guessed_words, loose_game
 
 
+print('\n\033[1;3m Поиграем в игру \033[33m"УГАДАЙКА СЛОВО"\033[0;1;3m?\033[0m')
+print(play_game.__doc__)
+input()
 guessed_words = []  # Пустой список угаданных слов
 loose_game = False  # Переменная проигрыша (для сброса списков)
 check = "Д"
