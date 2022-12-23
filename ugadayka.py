@@ -32,7 +32,7 @@ def words_updates() -> None:
         if any([' ' in a, '-' in a, '$' in a]):
             print('Здесь должно быть введено только ОДНО слово и без дефисов!')
             continue
-        elif a == '==':
+        elif a in ['==', '']:
             break
         b = input('Введите подсказку: ').capitalize()
         dct.setdefault(a, b)
@@ -42,9 +42,8 @@ def words_updates() -> None:
         print(f'Слово {a!r} успешно записано в словарь. Теперь в словаре {len(dct)} '
               f'слов{["", "о", "а", "а", "а", "", "", "", "", ""][len(dct)%10]}.')
         ch = input('Хотите добавить ещё слово? [д/н] ').upper()
-        if ch != 'Н':
-            continue
-        break
+        if ch == 'Н':
+            break
 
 
 def get_word() -> str:
