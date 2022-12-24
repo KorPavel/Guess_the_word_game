@@ -42,6 +42,8 @@ def words_updates() -> None:
         print(f'Слово {a!r} успешно записано в словарь. Теперь в словаре {len(dct)} '
               f'слов{["", "о", "а", "а", "а", "", "", "", "", ""][len(dct)%10]}.')
         ch = input('Хотите добавить ещё слово? [д/н] ').upper()
+        # if ch == 'Н':
+        #     break
 
 
 def get_word() -> str:
@@ -52,7 +54,11 @@ def get_word() -> str:
 
 def game_reset() -> (str, str):
     """ Функция сброса списков """
-    print('Обнуляем список слов...')
+    print('Обнуляем список слов ', end='')
+    for i in range(8):
+        __import__('time').sleep(0.75)
+        print('.', end=' ')
+    print()
     words_list_copy = words_list.copy()
     guessed_words = []
     return words_list_copy, guessed_words
@@ -181,11 +187,12 @@ check = "Д"
 # Основной цикл игры
 while check != "Н":
     if not words:  # Сброс, если закончились слова в списке
+        print('\U0001F389 \033[32m      П О З Д Р А В Л Я Е М! Вы угадали все слова!\033[0m \U0001F3C6 \U0001F37E')
         words, guessed_words = game_reset()
-        print('\U0001F389 \033[32m Поздравляем! Вы угадали все слова!\033[0m \U0001F3C6 \U0001F37E')
     elif loose_game:  # Сброс, если игрок проиграл
+        print('\033[32m      Уверен, в этот раз у Вас всё получится. УДАЧИ!\033[0m')
         words, guessed_words = game_reset()
-        print('Ваши попытки закончились, Вы проиграли. :(((')
+        loose_game = False
 
     word = get_word()
     guessed_words, loose_game = play_game(word, words_dct, guessed_words, loose_game)  # Запуск игровой сессии
