@@ -3,6 +3,7 @@ import requests
 from aiogram import Bot, Dispatcher, executor
 from aiogram.types import Message
 from aiogram.dispatcher.filters import Text
+from time import sleep
 
 # Вместо BOT TOKEN HERE нужно вставить токен вашего бота, полученный у @BotFather
 BOT_TOKEN: str = 'BOT TOKEN HERE'
@@ -74,12 +75,33 @@ def get_random_number() -> int:
     return __import__('random').randint(1, 100)
 
 
-def game_win_cat():
-    """ Функция отправляет пользователю случайную фотку с котиком за выигрыш в игре """
+def game_win_grls() -> str:
+    mega = 'https://kykyryzo.ru/devushki-v-mini-bikini/'
+    try:
+        sor = requests.get(mega).text
+        sp = [el.replace('src=\"', '').strip('\"') for el in sor.split()
+              if el.startswith('src="https://img-fotki.yandex.ru')]
+        pict = __import__('random').choice(sp)
+        return pict
+    except:
+        return game_win_cat()
+
+
+def game_win_cat() -> str:
+    """ Функция отправляет пользователю случайную фотку с котиком """
     cat_response = requests.get(API_CATS_URL)
     if cat_response.status_code == 200:
         return cat_response.json()['file']
-    return None
+    return ''
+
+
+def get_anekdot() -> str:
+    """ Функция отправляет пользователю случайный анекдот """
+    url = 'http://rzhunemogu.ru/RandJSON.aspx?CType=1'
+    yumor_response = requests.get(url)
+    if yumor_response.status_code == 200:
+        return yumor_response.text[12:-2]
+    return ''
 
 
 async def process_start_command(message: Message):
@@ -172,8 +194,8 @@ async def process_numbers_answer(message: Message):
             users[message.from_user.id]['total_games'] += 1
             users[message.from_user.id]['wins'] += 1
             await message.answer(f'<i><b>БРАВО!!!</b></i> Вы отгадали моё число!\nВ качестве приза '
-                                 f'вот Вам фотка с котиком:', parse_mode='html')
-            requests.get(f'{API_URL}{BOT_TOKEN}/sendPhoto?chat_id={message.from_user.id}&photo={game_win_cat()}')
+                                 f'вот Вам интересная картинка:', parse_mode='html')
+            requests.get(f'{API_URL}{BOT_TOKEN}/sendPhoto?chat_id={message.from_user.id}&photo={game_win_grls()}')
             await message.answer('Может, сыграем ещё?')
         elif int(message.text) > users[message.from_user.id]['secret_number']:
             users[message.from_user.id]['attempts'] -= 1
@@ -185,7 +207,11 @@ async def process_numbers_answer(message: Message):
         if users[message.from_user.id]['attempts'] == 0:
             await message.answer(
                 f'К сожалению, у вас больше не осталось попыток. Вы проиграли \U0001F641\n\n'
-                f'Моё число было {users[message.from_user.id]["secret_number"]}\n\nДавайте сыграем ещё?')
+                f'Моё число было <b>{users[message.from_user.id]["secret_number"]}</b>\n\nНе расстраивайтесь!\n'
+                f'Вам обязательно повезёт в следующий раз.\n'
+                f'А вот Вам мой новый анекдот:\n\n<i>{get_anekdot()}</i>', parse_mode='html')
+            sleep(10)
+            await message.answer('Может сыграем ещё разок?')
             users[message.from_user.id]['in_game'] = False
             users[message.from_user.id]['total_games'] += 1
     else:
@@ -215,7 +241,10 @@ async def process_letters_answer(message: Message):
             await message.answer(
                 f'К сожалению, у вас больше не осталось попыток. Вы проиграли \U0001F641\n\n'
                 f'Моё слово было "<b>{users[message.from_user.id]["secret_word"]}</b>"\n\n'
-                f'Давайте сыграем ещё?', parse_mode='html')
+                f'Не расстраивайтесь!\nВам обязательно повезёт в следующий раз.\nА вот Вам '
+                f'мой новый анекдот:\n\n<i>{get_anekdot()}</i>', parse_mode='html')
+            sleep(10)
+            await message.answer(f'Давайте сыграем ещё?')
             users[message.from_user.id]['in_game'] = False
             users[message.from_user.id]['total_games'] += 1
 
@@ -224,8 +253,8 @@ async def process_letters_answer(message: Message):
             users[message.from_user.id]['total_games'] += 1
             users[message.from_user.id]['wins'] += 1
             await message.answer(f'<i><b>БРАВО!!!</b></i> Вы отгадали моё слово!\nВ качестве приза '
-                                 f'вот Вам фотка с котиком:', parse_mode='html')
-            requests.get(f'{API_URL}{BOT_TOKEN}/sendPhoto?chat_id={message.from_user.id}&photo={game_win_cat()}')
+                                 f'вот Вам интересная картинка:', parse_mode='html')
+            requests.get(f'{API_URL}{BOT_TOKEN}/sendPhoto?chat_id={message.from_user.id}&photo={game_win_grls()}')
             await message.answer('Может, сыграем ещё?')
     else:
         await message.answer('Мы ещё не играем. Хотите сыграть?')
