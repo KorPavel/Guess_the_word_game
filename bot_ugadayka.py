@@ -1,12 +1,14 @@
 # Игра "Угадай число или слово"
-import requests
-from aiogram import Bot, Dispatcher, executor
-from aiogram.types import Message
+import requests, os, dotenv
+from aiogram import Bot, Dispatcher, executor, types
+from aiogram.types import Message, ReplyKeyboardMarkup, ReplyKeyboardRemove, KeyboardButton
 from aiogram.dispatcher.filters import Text
 from time import sleep
 
+dotenv.load_dotenv()
+
 # Вместо BOT TOKEN HERE нужно вставить токен вашего бота, полученный у @BotFather
-BOT_TOKEN: str = 'BOT TOKEN HERE'
+BOT_TOKEN: str = os.getenv('BOT_TOKEN')
 
 # Создаем объекты бота и диспетчера
 bot: Bot = Bot(BOT_TOKEN)
@@ -23,9 +25,22 @@ no_list: list = ['Нет', 'Не', 'Не хочу', 'No', '-', 'Ytn', 'N']
 alphabet: str = "АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯабвгдеёжзийклмнопрстуфхцчшщъыьэюя"
 API_URL: str = 'https://api.telegram.org/bot'
 API_CATS_URL: str = 'https://aws.random.cat/meow'
+API_GRLS_URL: str = 'https://zagony.ru/admin_new/foto/2022-8-12/1660291926/devushki-v-bikini-74-foto_'
 cat_response: requests.Response
 cat_link: str
 
+# Создаем объект клавиатуры
+keyboard: ReplyKeyboardMarkup = ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True)
+
+# Создаем объекты кнопок
+button_1: KeyboardButton = KeyboardButton('\U00002714 Да')
+button_2: KeyboardButton = KeyboardButton('\U0000274C Нет')
+button_3: KeyboardButton = KeyboardButton('\U0001F914 Подсказка к слову')
+button_4: KeyboardButton = KeyboardButton('\U0001F923 Анекдот')
+
+# Добавляем кнопки в клавиатуру методом add
+keyboard.add(button_1, button_2)
+keyboard.add(button_3, button_4)
 
 def display_lives(tries) -> str:
     """ Функция выбора графического отображения оставшихся попыток """
@@ -88,7 +103,7 @@ def game_win_grls() -> str:
 
 
 def game_win_cat() -> str:
-    """ Функция отправляет пользователю случайную фотку с котиком """
+    """ Функция отправляет пользователю случайную фотку с котиком за выигрыш в игре """
     cat_response = requests.get(API_CATS_URL)
     if cat_response.status_code == 200:
         return cat_response.json()['file']
@@ -96,7 +111,6 @@ def game_win_cat() -> str:
 
 
 def get_anekdot() -> str:
-    """ Функция отправляет пользователю случайный анекдот """
     url = 'http://rzhunemogu.ru/RandJSON.aspx?CType=1'
     yumor_response = requests.get(url)
     if yumor_response.status_code == 200:
@@ -108,7 +122,8 @@ async def process_start_command(message: Message):
     """ Этот хэндлер будет срабатывать на команду "/start" """
     await message.answer(
         'Привет!\nДавай сыграем в игру "Угадай число или слово"?\n\n'
-        'Чтобы получить правила игры и список доступных команд - отправьте команду /help')
+        'Чтобы получить правила игры и список доступных команд - отправьте команду /help',
+        reply_markup=keyboard)
     # Если пользователь только запустил бота и его нет в словаре users - добавляем его в словарь
     if message.from_user.id not in users:
         users[message.from_user.id] = {'in_game': False,
@@ -143,6 +158,16 @@ async def process_hint_command(message: Message):
     """ Этот хэндлер будет срабатывать на команду "/?" """
     await message.answer(f'Подсказка по загаданному слову:\n'
                          f'{users[message.from_user.id]["help_word"]}\n')
+
+
+async def next_anekdot(message: Message):
+    """ Этот хэндлер будет срабатывать на команду "/++" """
+    await message.answer(f'А вот ещё анекдот:\n\n<i>{get_anekdot()}</i>', parse_mode='html')
+
+
+async def next_pict(message: Message):
+    """ Этот хэндлер будет срабатывать на команду "/&&" """
+    requests.get(f'{API_URL}{BOT_TOKEN}/sendPhoto?chat_id={message.from_user.id}&photo={game_win_grls()}')
 
 
 async def process_cancel_command(message: Message):
@@ -210,7 +235,7 @@ async def process_numbers_answer(message: Message):
                 f'Моё число было <b>{users[message.from_user.id]["secret_number"]}</b>\n\nНе расстраивайтесь!\n'
                 f'Вам обязательно повезёт в следующий раз.\n'
                 f'А вот Вам мой новый анекдот:\n\n<i>{get_anekdot()}</i>', parse_mode='html')
-            sleep(10)
+            sleep(5)
             await message.answer('Может сыграем ещё разок?')
             users[message.from_user.id]['in_game'] = False
             users[message.from_user.id]['total_games'] += 1
@@ -243,7 +268,7 @@ async def process_letters_answer(message: Message):
                 f'Моё слово было "<b>{users[message.from_user.id]["secret_word"]}</b>"\n\n'
                 f'Не расстраивайтесь!\nВам обязательно повезёт в следующий раз.\nА вот Вам '
                 f'мой новый анекдот:\n\n<i>{get_anekdot()}</i>', parse_mode='html')
-            sleep(10)
+            sleep(5)
             await message.answer(f'Давайте сыграем ещё?')
             users[message.from_user.id]['in_game'] = False
             users[message.from_user.id]['total_games'] += 1
@@ -275,8 +300,14 @@ dp.register_message_handler(process_help_command, commands='help')
 dp.register_message_handler(process_stat_command, commands='stat')
 dp.register_message_handler(process_cancel_command, commands='cancel')
 dp.register_message_handler(process_hint_command, commands='?')
+dp.register_message_handler(next_anekdot, commands='++')
+dp.register_message_handler(next_pict, commands='&&')
 dp.register_message_handler(process_positive_answer, Text(equals=yes_list, ignore_case=True))
 dp.register_message_handler(process_negative_answer, Text(equals=no_list, ignore_case=True))
+dp.register_message_handler(process_positive_answer, text='\U00002714 Да')
+dp.register_message_handler(process_negative_answer, text='\U0000274C Нет')
+dp.register_message_handler(process_hint_command, text='\U0001F914 Подсказка к слову')
+dp.register_message_handler(next_anekdot, text='\U0001F923 Анекдот')
 dp.register_message_handler(process_numbers_answer, lambda x: x.text.isdigit() and 1 <= int(x.text) <= 100)
 dp.register_message_handler(process_letters_answer, lambda x: x.text.isalpha() and x.text in alphabet)
 dp.register_message_handler(process_other_text_answers)
