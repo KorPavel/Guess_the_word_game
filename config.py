@@ -16,10 +16,6 @@ def display_lives(tries) -> str:
     return stages[tries]
 
 
-
-
-
-
 # Вместо BOT TOKEN HERE нужно вставить токен вашего бота, полученный у @BotFather
 BOT_TOKEN: str = os.getenv('BOT_TOKEN')
 
@@ -37,9 +33,10 @@ cat_link: str
 
 API_URL: str = 'https://api.telegram.org/bot'
 API_CATS_URL: str = 'https://aws.random.cat/meow'
-API_GRLS_URL: str = 'https://zagony.ru/admin_new/foto/2022-8-12/1660291926/devushki-v-bikini-74-foto_'
-MEGA_URL = 'https://kykyryzo.ru/devushki-v-mini-bikini/'
-YUMOR_URL = 'http://rzhunemogu.ru/RandJSON.aspx?CType=1'
+# API_GRLS_URL: str = 'https://zagony.ru/admin_new/foto/2022-8-12/1660291926/devushki-v-bikini-74-foto_'
+MEGA1_URL: str = 'https://uprostim.com/110-foto-krasivyh-lits-devushek/'
+MEGA2_URL: str = 'https://uprostim.com/160-foto-krasivyh-devushek-18-let/'
+YUMOR_URL: str = 'http://rzhunemogu.ru/RandJSON.aspx?CType=1'
 
 TEXT_START = 'Привет!\nДавай сыграем в игру "Угадай число или слово"?\n\n' \
              'Чтобы получить правила игры и список доступных команд - отправьте команду /help'
