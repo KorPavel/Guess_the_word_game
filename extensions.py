@@ -1,5 +1,6 @@
-import requests
-from config import MEGA_URL, API_CATS_URL, YUMOR_URL
+import requests, os
+from random import randint, choice
+from config import MEGA1_URL, MEGA2_URL, API_CATS_URL, YUMOR_URL
 
 
 def read_words() -> dict:
@@ -8,7 +9,7 @@ def read_words() -> dict:
     основная программа новый файл с одним словом. Вам нужно будет придумывать
     новые слова для пополнения словаря. Новые слова будут доступны при запуске
     нового сеанса игры. """
-    if __import__('os.path').path.exists('ugadayka_words.txt'):
+    if os.path.exists('ugadayka_words.txt'):
         with open('ugadayka_words.txt', encoding='utf-8') as f:
             words_dict = {}
             for row in f.readlines():
@@ -28,22 +29,25 @@ words = words_list.copy()
 
 def get_random_word() -> tuple[str, str]:
     """ Выбор случайного слова. Подсказка к слову прилагается """
-    word = __import__('random').choice(words)
+    word = choice(words)
     help_word = words_dct[word]
     return word, help_word
 
 
 def get_random_number() -> int:
     """ Функция возвращает случайное целое число от 1 до 100 """
-    return __import__('random').randint(1, 100)
+    return randint(1, 100)
 
 
 def game_win_grls() -> str:
     try:
-        sor = requests.get(MEGA_URL).text
-        sp = [el.replace('src=\"', '').strip('\"') for el in sor.split()
-              if el.startswith('src="https://img-fotki.yandex.ru')]
-        pict = __import__('random').choice(sp)
+        sp = []
+        for i in [MEGA1_URL, MEGA2_URL]:
+            sor = requests.get(i).text
+            lst = [el.replace('src=\"', '').strip('\"') for el in sor.split()
+                   if el.startswith('src=\"https://uprostim') and 'image' in el]
+            sp.extend(lst)
+        pict = choice(sp)
         return pict
     except:
         return game_win_cat()
