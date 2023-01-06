@@ -1,6 +1,7 @@
-import requests, os
+import os
+import requests
 from random import randint, choice
-from config import MEGA1_URL, MEGA2_URL, API_CATS_URL, YUMOR_URL
+from config import API_CATS_URL, YUMOR_URL
 
 
 def read_words() -> dict:
@@ -39,14 +40,13 @@ def get_random_number() -> int:
     return randint(1, 100)
 
 
-def game_win_grls() -> str:
+def get_pict(list_url) -> str:
     try:
         sp = []
-        for i in [MEGA1_URL, MEGA2_URL]:
-            sor = requests.get(i).text
-            lst = [el.replace('src=\"', '').strip('\"') for el in sor.split()
-                   if el.startswith('src=\"https://uprostim') and 'image' in el]
-            sp.extend(lst)
+        sor = requests.get(choice(list_url)).text
+        lst = [el.replace('src=\"', '').strip('\"') for el in sor.split()
+               if el.startswith('src=\"https://') and '.jp' in el]
+        sp.extend(lst)
         pict = choice(sp)
         return pict
     except:
