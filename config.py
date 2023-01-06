@@ -1,19 +1,14 @@
-import requests, os, dotenv
+import os
+import dotenv
+import requests
 
 
 dotenv.load_dotenv()
 
 
-def display_lives(tries) -> str:
-    """ Функция выбора графического отображения оставшихся попыток """
-    stages = ["\U0001f90D \U0001f90D \U0001f90D \U0001f90D \U0001f90D \U0001f90D",
-              "\U0001f9E1 \U0001f90D \U0001f90D \U0001f90D \U0001f90D \U0001f90D",
-              "\U0001f9E1 \U0001f9E1 \U0001f90D \U0001f90D \U0001f90D \U0001f90D",
-              "\U0001f9E1 \U0001f9E1 \U0001f9E1 \U0001f90D \U0001f90D \U0001f90D",
-              "\U0001f9E1 \U0001f9E1 \U0001f9E1 \U0001f9E1 \U0001f90D \U0001f90D",
-              "\U0001f9E1 \U0001f9E1 \U0001f9E1 \U0001f9E1 \U0001f9E1 \U0001f90D",
-              "\U0001f9E1 \U0001f9E1 \U0001f9E1 \U0001f9E1 \U0001f9E1 \U0001f9E1"]
-    return stages[tries]
+def display_lives(attempts, tries) -> str:
+    """ Функция отображает оставшиеся попытки """
+    return '\U0001f9E1' * tries + '\U0001f90D' * (attempts - tries)
 
 
 # Вместо BOT TOKEN HERE нужно вставить токен вашего бота, полученный у @BotFather
@@ -34,8 +29,10 @@ cat_link: str
 API_URL: str = 'https://api.telegram.org/bot'
 API_CATS_URL: str = 'https://aws.random.cat/meow'
 # API_GRLS_URL: str = 'https://zagony.ru/admin_new/foto/2022-8-12/1660291926/devushki-v-bikini-74-foto_'
-MEGA1_URL: str = 'https://uprostim.com/110-foto-krasivyh-lits-devushek/'
-MEGA2_URL: str = 'https://uprostim.com/160-foto-krasivyh-devushek-18-let/'
+MEGA_URL: list = ['https://uprostim.com/110-foto-krasivyh-lits-devushek/',
+                  'https://uprostim.com/160-foto-krasivyh-devushek-18-let/',
+                  'https://webmg.ru/150-foto-s-krasivymi-zhenskimi-litsami/']
+BIPBAP_URL: list = ['https://bipbap.ru/prikoly/prikoly-82-foto.html']
 YUMOR_URL: str = 'http://rzhunemogu.ru/RandJSON.aspx?CType=1'
 
 TEXT_START = 'Привет!\nДавай сыграем в игру "Угадай число или слово"?\n\n' \
@@ -51,4 +48,20 @@ TEXT_CANCEL = 'Вы вышли из игры. Если захотите сыгр
 TEXT_OTHER = 'Пока мы играем в игру я могу реагировать только на числа от 1 до 100, ' \
              'русские буквы и команды /cancel, /stat и /?'
 TEXT_ELSE = 'Мы ещё не играем. Хотите сыграть?'
-TEXT_NEG = '<i>Жаль</i> \U0001F641\n\nЕсли захотите поиграть - просто напишите об этом'
+TEXT_NEG = 'Очень жаль, что Вы не сыграли в игру.\U0001F641\nПриходите в следующий раз. ' \
+           'У Вас всё получится!'
+TEXT_NEG1 = '<b>Спасибо за игру!</b>\nНадеюсь на скорейшее возвращение.'
+TEXT_HINT = 'Подсказка по загаданному слову:\n{}\n'
+TEXT_STAT = 'Всего игр сыграно: {}\nИгр выиграно: {}'
+TEXT_POSITIVE = '<b>Ура!</b>\n\nЯ загадал число от 1 до 100\nи вот такое слово <b>"{}"</b> из ' \
+                '{} букв.\nПопробуйте отгадать ЧИСЛО или СЛОВО.\n<i>Ваши попытки:</i>\n{}'
+TEXT_NUM_WIN = f'<i><b>БРАВО!!!</b></i> Моё число отгадано!\nВ качестве приза зацени прикол:'
+TEXT_NUM_LOST = 'К сожалению, у вас больше не осталось попыток. Вы проиграли \U0001F641\n\n' \
+                'Моё число было <b>{}</b>\n\nНе расстраивайтесь!\nВам обязательно повезёт в следующий ' \
+                'раз.\nА вот Вам мой новый анекдот:\n\n<i>{}</i>'
+TEXT_LET_YES = 'Ура!!! Буква "<b>{}</b>" в этом слове ЕСТЬ!\n<b>"{}"</b>\n{}'
+TEXT_LET_NO = 'Буквы "<b>{}</b>" этом слове НЕТ!\n<b>"{}"</b>\n{}'
+TEXT_LET_WIN = '<i><b>БРАВО!!!</b></i> Моё слово отгадано!\nВ качестве приза зацени вот этот прикол:'
+TEXT_LET_LOST = 'К сожалению, у вас больше не осталось попыток. Вы проиграли \U0001F641\n\n' \
+                'Моё слово было "<b>{}</b>"\n\nНе расстраивайтесь!\nВам обязательно повезёт в ' \
+                'следующий раз.\nА вот Вам мой новый анекдот:\n\n<i>{}</i>'
