@@ -42,11 +42,9 @@ def get_random_number() -> int:
 
 def get_pict(list_url) -> str:
     try:
-        sp = []
         sor = requests.get(choice(list_url)).text
-        lst = [el.replace('src=\"', '').strip('\"') for el in sor.split()
-               if el.startswith('src=\"https://') and '.jp' in el]
-        sp.extend(lst)
+        sp = [el.replace('src=\"', '').strip('\"') for el in sor.split()
+              if el.startswith('src=\"https://') and '.jp' in el]
         pict = choice(sp)
         return pict
     except:
